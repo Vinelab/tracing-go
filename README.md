@@ -89,7 +89,7 @@ func init() {
 		Trace, err = zipkin.NewTracer(zipkin.TracerOptions{
 			ServiceName: "example",
 			Host:        "localhost",
-			Port:        9411,
+			Port:        "9411",
 		})
 	case "noop":
 		Trace = noop.NewTracer()

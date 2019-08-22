@@ -41,7 +41,7 @@ type TracerOptions struct {
 	Host string
 	// Port
 	// Required
-	Port int
+	Port string
 	// UsesTraceID128Bit tells whether to use 128 bit trace IDs (32 characters in length as opposed to 16)
 	// Defaults to false
 	UsesTraceID128Bit bool
@@ -62,11 +62,11 @@ func NewTracer(opt TracerOptions) (*Tracer, error) {
 	if opt.Reporter != nil {
 		rep = opt.Reporter
 	} else {
-		url := fmt.Sprintf("http://%s:%d/api/v2/spans", opt.Host, opt.Port)
+		url := fmt.Sprintf("http://%s:%s/api/v2/spans", opt.Host, opt.Port)
 		rep = httpreporter.NewReporter(url)
 	}
 
-	endpoint, err := openzipkin.NewEndpoint(opt.ServiceName, fmt.Sprintf("%s:%d", opt.Host, opt.Port))
+	endpoint, err := openzipkin.NewEndpoint(opt.ServiceName, fmt.Sprintf("%s:%s", opt.Host, opt.Port))
 	if err != nil {
 		return nil, err
 	}
