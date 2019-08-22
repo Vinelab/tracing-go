@@ -18,6 +18,10 @@ var (
 	// MaxTagLen controls the maximum size of tag value in bytes
 	// Defaults to 1048576 bytes (1MB)
 	MaxTagLen = 1048576
+
+	// ErrCollectorIPNotFound is returned if you used hostname in place of collector IP
+	// and we weren't able to resolve the valid address from it
+	ErrCollectorIPNotFound = errors.New("unable to resolve collector's IP address")
 )
 
 // Tracer is the tracing implementation for Zipkin. It should be initialized using NewTracer method.
@@ -228,7 +232,19 @@ func resolveCollectorIP(host string) (string, error) {
 		return host, err
 	}
 
-	return ips[0].String(), nil
+	for _, ip := range ips  {
+		if ip.IsLoopback() {
+			if ip.To4() != nil {
+				return ip.String(), nil
+			}
+
+			continue
+		}
+
+		return ip.String(), nil
+	}
+
+	return "", ErrCollectorIPNotFound
 }
 
 func registerDefaultExtractionFormats() map[string]tracing.Extractor {
