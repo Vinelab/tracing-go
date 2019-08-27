@@ -66,11 +66,6 @@ func (tracer *Tracer) Extract(carrier interface{}, format string) (tracing.SpanC
 // Inject implicitly serializes current span context using the format descriptor that
 // tells how to encode trace info in the carrier parameters
 func (tracer *Tracer) Inject(carrier interface{}, format string) error {
-	span := tracer.currentSpan
-	if span == nil {
-		return tracing.ErrMissingTraceContext
-	}
-
 	return nil
 }
 

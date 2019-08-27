@@ -1,14 +1,7 @@
 package tracing
 
 import (
-	"errors"
 	"fmt"
-)
-
-var (
-	// ErrMissingTraceContext is returned when trying to implicitly inject SpanContext
-	// and there is no active span
-	ErrMissingTraceContext = errors.New("cannot obtain context because there is no active span")
 )
 
 // UnregisteredFormatError is returned when you tried to inject/extract trace context

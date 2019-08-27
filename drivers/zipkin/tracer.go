@@ -172,7 +172,7 @@ func (tracer *Tracer) Extract(carrier interface{}, format string) (tracing.SpanC
 func (tracer *Tracer) Inject(carrier interface{}, format string) error {
 	span := tracer.currentSpan
 	if span == nil {
-		return tracing.ErrMissingTraceContext
+		return nil
 	}
 
 	injector, ok := tracer.injectionFormats[format]
