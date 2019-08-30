@@ -19,13 +19,15 @@ import (
 type TraceRequests struct {
 	tracer       tracing.Tracer
 	contentTypes []string
+	excludedPaths []string
 }
 
 // NewTraceRequests creates a new TraceRequests middleware with the provided options
-func NewTraceRequests(tracer tracing.Tracer, contentTypes []string) *TraceRequests {
+func NewTraceRequests(tracer tracing.Tracer, contentTypes []string, excludedPaths []string) *TraceRequests {
 	return &TraceRequests{
 		tracer:       tracer,
 		contentTypes: contentTypes,
+		excludedPaths: excludedPaths,
 	}
 }
 
@@ -34,6 +36,11 @@ func NewTraceRequests(tracer tracing.Tracer, contentTypes []string) *TraceReques
 // client ip, input, response code and content etc.
 func (mdlw *TraceRequests) Handler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		if slice.Contains(mdlw.excludedPaths, r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// Create a proxy that hooks into response and allows us to access its contents
 		response := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
