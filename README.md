@@ -248,7 +248,8 @@ import (
 func main() {
 	router := chi.NewRouter()
 
-	router.Use(middleware.NewTraceRequests(Trace, []string{"application/json"}).Handler)
+	// tracer, slice of content-types for request and response bodies you want to log and slcie of excluded url paths
+	router.Use(middleware.NewTraceRequests(Trace, []string{"application/json"}, []string{}).Handler)
 
 	// ...
 }
