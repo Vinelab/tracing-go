@@ -296,6 +296,7 @@ import "github.com/Vinelab/tracing-go/formats"
 spanCtx, err := Trace.Extract(&carrier, formats.TextMap)
 spanCtx, err := Trace.Extract(&carrier, formats.HTTP)
 spanCtx, err := Trace.Extract(&carrier, formats.AMQP)
+spanCtx, err := Trace.Extract(&carrier, formats.GooglePubSub)
 ```
 
 You may also add your own format using `RegisterExtractionFormat` method:
@@ -328,6 +329,7 @@ import "github.com/Vinelab/tracing-go/formats"
 err := Trace.Inject(&carrier, formats.TextMap)
 err := Trace.Inject(&carrier, formats.HTTP)
 err := Trace.Inject(&carrier, formats.AMQP)
+err := Trace.Inject(&carrier, formats.GooglePubSub)
 ```
 
 You may also add your own format using `RegisterInjectionFormat` method.

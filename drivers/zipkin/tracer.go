@@ -253,6 +253,7 @@ func registerDefaultExtractionFormats() map[string]tracing.Extractor {
 	extractionFormats[formats.TextMap] = NewTextMapExtractor()
 	extractionFormats[formats.HTTP] = NewHTTPExtractor()
 	extractionFormats[formats.AMQP] = NewAMQPExtractor()
+	extractionFormats[formats.GooglePubSub] = NewGooglePubSubExtractor()
 
 	return extractionFormats
 }
@@ -263,6 +264,7 @@ func registerDefaultInjectionFormats() map[string]tracing.Injector {
 	injectionFormats[formats.TextMap] = NewTextMapInjector()
 	injectionFormats[formats.HTTP] = NewHTTPInjector()
 	injectionFormats[formats.AMQP] = NewAMQPInjector()
+	injectionFormats[formats.GooglePubSub] = NewGooglePubSubInjector()
 
 	return injectionFormats
 }
