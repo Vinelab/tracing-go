@@ -9,4 +9,7 @@ var (
 
 	// AMQP is a format descriptor for propagating trace context via AMQP message
 	AMQP = "amqp"
+
+	// GooglePubSub is a format descriptor for propagating trace context via Google Cloud PubSub message
+	GooglePubSub = "google_pubsub"
 )
