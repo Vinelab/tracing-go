@@ -89,10 +89,16 @@ func (mdlw *TraceRequests) Handler(next http.Handler) http.Handler {
 
 func getRequestInput(r *http.Request) string {
 	data, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
-		log.Fatal("Unable to read request body")
+		log.Fatalf("unable to read request body %v", err)
 	}
+
+	if err := r.Body.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	// construct a new ReadCloser to hand it over to the next handler
+	r.Body = ioutil.NopCloser(bytes.NewReader(data))
 
 	return string(data)
 }
