@@ -3,7 +3,9 @@ package zipkin
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
+	"time"
 
 	"github.com/Vinelab/tracing-go"
 	"github.com/Vinelab/tracing-go/formats"
@@ -14,11 +16,14 @@ import (
 	httpreporter "github.com/openzipkin/zipkin-go/reporter/http"
 )
 
-var (
+const (
 	// MaxTagLen controls the maximum size of tag value in bytes
-	// Defaults to 1048576 bytes (1MB)
 	MaxTagLen = 1048576
+	// DefaultRequestTimeout sets maximum timeout for http request to send spans
+	DefaultRequestTimeout = time.Second * 5
+)
 
+var (
 	// ErrCollectorIPNotFound is returned if you used hostname in place of collector IP
 	// and we weren't able to resolve the valid address from it
 	ErrCollectorIPNotFound = errors.New("unable to resolve collector's IP address")
@@ -52,22 +57,35 @@ type TracerOptions struct {
 	// Reporter option allows to inject your own reporter for tests
 	// Defaults to http reporter
 	Reporter reporter.Reporter
+	// Timeout sets maximum timeout for http request to send spans
+	// Setting this to a too high value is not recommended because it
+	// 	may degrade your system performance when collector is down.
+	// Note that reporter will re-try after the first failure.
+	// 	See this issue for more details: https://github.com/openzipkin/zipkin-go/issues/147
+	RequestTimeout time.Duration
 }
 
 // NewTracer returns a new Zipkin tracer.
 func NewTracer(opt TracerOptions) (*Tracer, error) {
 	ipAddr, err := resolveCollectorIP(opt.Host)
 	if err != nil {
-		return nil, err
+		log.Printf("Unable to resolve collector's IP address from hostname %s: %s", opt.Host, err.Error())
 	}
 	opt.Host = ipAddr
+
+	var timeout time.Duration
+	if opt.RequestTimeout != 0 {
+		timeout = opt.RequestTimeout
+	} else {
+		timeout = DefaultRequestTimeout
+	}
 
 	var rep reporter.Reporter
 	if opt.Reporter != nil {
 		rep = opt.Reporter
 	} else {
 		url := fmt.Sprintf("http://%s:%s/api/v2/spans", opt.Host, opt.Port)
-		rep = httpreporter.NewReporter(url)
+		rep = httpreporter.NewReporter(url, httpreporter.Timeout(timeout))
 	}
 
 	endpoint, err := openzipkin.NewEndpoint(opt.ServiceName, fmt.Sprintf("%s:%s", opt.Host, opt.Port))
@@ -229,10 +247,10 @@ func resolveCollectorIP(host string) (string, error) {
 
 	ips, err := net.LookupIP(host)
 	if err != nil {
-		return host, err
+		return "127.0.0.1", err
 	}
 
-	for _, ip := range ips  {
+	for _, ip := range ips {
 		if ip.IsLoopback() {
 			if ip.To4() != nil {
 				return ip.String(), nil
@@ -244,7 +262,7 @@ func resolveCollectorIP(host string) (string, error) {
 		return ip.String(), nil
 	}
 
-	return "", ErrCollectorIPNotFound
+	return "127.0.0.1", ErrCollectorIPNotFound
 }
 
 func registerDefaultExtractionFormats() map[string]tracing.Extractor {
